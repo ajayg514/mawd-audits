@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLIP Office — Homepage Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --wire-bg:       #F5F4F1;
+    --wire-block:    #E2E0DA;
+    --wire-dark:     #2C2C2C;
+    --wire-mid:      #6B6B6B;
+    --wire-light:    #9A9A9A;
+    --wire-border:   #C8C5BC;
+    --wire-orange:   #C85A2A;
+    --wire-orange-l: #F5E8E1;
+    --wire-blue:     #2B5C8A;
+    --wire-blue-l:   #E8F0F7;
+    --wire-green:    #3A7D44;
+    --wire-green-l:  #E6F2E8;
+    --wire-white:    #FFFFFF;
+    --font:          'Inter', sans-serif;
+  }
+
+  body { font-family: var(--font); background: #ECEAE5; color: var(--wire-dark); line-height: 1.5; }
+
+  /* ── ANNOTATION PANEL ── */
+  .anno-panel {
+    position: fixed; top: 0; right: 0; width: 300px; height: 100vh;
+    background: var(--wire-dark); color: #fff;
+    display: flex; flex-direction: column;
+    z-index: 1000; box-shadow: -4px 0 20px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease;
+  }
+  .anno-panel.collapsed { transform: translateX(300px); }
+  .anno-header {
+    padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+    background: #1a1a1a; flex-shrink: 0;
+  }
+  .anno-header h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wire-orange); }
+  .anno-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 18px; padding: 4px; line-height: 1; }
+  .anno-close:hover { color: #fff; }
+  .anno-body { flex: 1; overflow-y: auto; padding: 0; }
+  .anno-section { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: background 0.15s; }
+  .anno-section:hover { background: rgba(255,255,255,0.04); }
+  .anno-section.active { background: rgba(200,90,42,0.15); border-left: 3px solid var(--wire-orange); }
+  .anno-num { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: var(--wire-orange); text-transform: uppercase; margin-bottom: 4px; }
+  .anno-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .anno-note { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; font-weight: 300; }
+  .anno-tag { display: inline-block; margin-top: 8px; font-size: 10px; padding: 2px 8px; border-radius: 2px; font-weight: 600; letter-spacing: 0.06em; }
+  .tag-strategy { background: rgba(200,90,42,0.25); color: #F5A882; }
+  .tag-copy { background: rgba(43,92,138,0.3); color: #88B4D8; }
+  .tag-ux { background: rgba(58,125,68,0.3); color: #88C494; }
+
+  /* ── TOGGLE TAB ── */
+  .anno-toggle {
+    position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+    background: var(--wire-orange); color: #fff; border: none;
+    padding: 12px 8px; cursor: pointer; z-index: 999;
+    font-family: var(--font); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    writing-mode: vertical-lr; border-radius: 4px 0 0 4px;
+    transition: right 0.3s ease, background 0.2s;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+  }
+  .anno-toggle:hover { background: #A84720; }
+  .anno-toggle.shifted { right: 300px; }
+
+  /* ── PAGE WRAPPER ── */
+  .page-wrap { margin-right: 300px; transition: margin-right 0.3s ease; }
+  .page-wrap.full { margin-right: 0; }
+
+  /* ── SECTION LABELS ── */
+  .section-label-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 16px; background: var(--wire-dark);
+    cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .section-label-bar:hover { background: #3a3a3a; }
+  .section-label-bar.active { background: rgba(200,90,42,0.8); }
+  .slb-num { font-size: 10px; font-weight: 700; color: var(--wire-orange); letter-spacing: 0.12em; min-width: 24px; }
+  .section-label-bar.active .slb-num { color: rgba(255,255,255,0.8); }
+  .slb-name { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); letter-spacing: 0.06em; text-transform: uppercase; flex: 1; }
+  .slb-tag { font-size: 10px; color: rgba(255,255,255,0.35); font-style: italic; }
+
+  /* ── WIREFRAME BLOCKS ── */
+  .wf-section { background: var(--wire-bg); border-bottom: 2px solid var(--wire-border); position: relative; }
+  .wf-section:hover { outline: 2px dashed rgba(200,90,42,0.4); outline-offset: -2px; }
+
+  /* TOPBAR */
+  .wf-topbar { background: var(--wire-white); border-bottom: 1px solid var(--wire-border); padding: 8px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .wf-topbar-pill { background: var(--wire-orange); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; letter-spacing: 0.06em; }
+  .wf-topbar-items { display: flex; gap: 16px; }
+  .wf-topbar-item { width: 80px; height: 10px; background: var(--wire-block); border-radius: 2px; }
+  .wf-topbar-item.sm { width: 50px; }
+  .wf-topbar-social { display: flex; gap: 8px; }
+  .wf-social-dot { width: 20px; height: 20px; background: var(--wire-block); border-radius: 50%; }
+
+  /* NAV */
+  .wf-nav { background: #3A3D42; padding: 0 32px; display: flex; align-items: stretch; justify-content: space-between; height: 64px; }
+  .wf-nav-logo { display: flex; align-items: center; }
+  .wf-nav-logo img { height: 40px; width: auto; filter: brightness(0) invert(1); opacity: 0.9; }
+  .wf-nav-links { display: flex; align-items: stretch; gap: 0; }
+  .wf-nav-link { display: flex; align-items: center; padding: 0 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.6); border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .wf-nav-link:hover { color: #fff; border-bottom-color: var(--wire-orange); }
+  .wf-nav-cta { display: flex; align-items: center; }
+  .wf-btn { padding: 9px 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; border: none; font-family: var(--font); }
+  .wf-btn-orange { background: var(--wire-orange); color: #fff; }
+  .wf-btn-orange:hover { background: #A84720; }
+  .wf-btn-outline { background: transparent; color: rgba(255,255,255,0.7); border: 1.5px solid rgba(255,255,255,0.3); }
+  .wf-btn-outline:hover { border-color: #fff; color: #fff; }
+
+  /* HERO */
+  .wf-hero { display: grid; grid-template-columns: 55fr 45fr; min-height: 420px; }
+  .wf-hero-left { background: #3A3D42; padding: 56px 48px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+  .wf-eyebrow { height: 10px; width: 260px; background: var(--wire-orange); opacity: 0.7; border-radius: 2px; }
+  .wf-h1 { display: flex; flex-direction: column; gap: 6px; }
+  .wf-h1-line { height: 18px; background: rgba(255,255,255,0.75); border-radius: 2px; }
+  .wf-h1-line.w100 { width: 100%; }
+  .wf-h1-line.w80 { width: 80%; }
+  .wf-h1-line.orange { background: var(--wire-orange); opacity: 0.8; }
+  .wf-rule { width: 40px; height: 3px; background: var(--wire-orange); }
+  .wf-body-lines { display: flex; flex-direction: column; gap: 6px; }
+  .wf-body-line { height: 9px; background: rgba(255,255,255,0.25); border-radius: 2px; }
+  .wf-body-line.w100 { width: 100%; }
+  .wf-body-line.w90 { width: 90%; }
+  .wf-body-line.w70 { width: 70%; }
+  .wf-hero-btns { display: flex; gap: 12px; margin-top: 8px; }
+  .wf-hero-right { background: var(--wire-block); position: relative; display: flex; align-items: flex-end; justify-content: flex-start; padding: 24px; }
+  .wf-img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+  .wf-img-icon { width: 48px; height: 48px; border: 2px dashed var(--wire-border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--wire-light); }
+  .wf-img-label { font-size: 11px; color: var(--wire-light); letter-spacing: 0.06em; text-align: center; }
+  .wf-hero-badge { background: rgba(255,255,255,0.92); padding: 10px 16px; position: absolute; bottom: 24px; left: 24px; right: 24px; }
+  .wf-badge-line { height: 8px; background: var(--wire-block); border-radius: 1px; margin-bottom: 5px; }
+  .wf-badge-line.orange { background: var(--wire-orange); opacity: 0.5; width: 60%; }
+  .wf-badge-line.full { width: 100%; }
+
+  /* STATS STRIP */
+  .wf-stats { background: var(--wire-orange); display: grid; grid-template-columns: repeat(4,1fr); }
+  .wf-stat { padding: 24px 20px; border-right: 1px solid rgba(255,255,255,0.2); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .wf-stat:last-child { border-right: none; }
+  .wf-stat-num { height: 24px; width: 90px; background: rgba(255,255,255,0.85); border-radius: 2px; }
+  .wf-stat-label { height: 8px; width: 110px; background: rgba(255,255,255,0.4); border-radius: 2px; }
+
+  /* 3 PILLARS */
+  .wf-pillars-section { padding: 56px 32px; background: var(--wire-white); }
+  .wf-section-head { margin-bottom: 40px; }
+  .wf-section-eyebrow { height: 8px; width: 140px; background: var(--wire-orange); opacity: 0.6; border-radius: 2px; margin-bottom: 10px; }
+  .wf-section-title { height: 20px; width: 340px; background: var(--wire-dark); opacity: 0.7; border-radius: 2px; margin-bottom: 12px; }
+  .wf-section-sub { display: flex; flex-direction: column; gap: 5px; max-width: 520px; }
+  .wf-section-sub-line { height: 8px; background: var(--wire-block); border-radius: 2px; }
+  .wf-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--wire-border); border: 1px solid var(--wire-border); }
+  .wf-pillar { background: var(--wire-white); padding: 32px 28px; display: flex; flex-direction: column; gap: 12px; transition: background 0.15s; cursor: pointer; }
+  .wf-pillar:hover { background: var(--wire-orange-l); }
+  .wf-pillar-accent { width: 36px; height: 3px; background: var(--wire-orange); }
+  .wf-pillar-num { height: 28px; width: 32px; background: var(--wire-block); border-radius: 2px; }
+  .wf-pillar-title { height: 14px; width: 160px; background: var(--wire-dark); opacity: 0.65; border-radius: 2px; }
+  .wf-pillar-body { display: flex; flex-direction: column; gap: 5px; }
+  .wf-pillar-line { height: 7px; background: var(--wire-block); border-radius: 2px; }
+  .wf-pillar-tag { height: 8px; width: 120px; background: var(--wire-orange); opacity: 0.4; border-radius: 1px; margin-top: 8px; }
+  .pillar-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wire-mid); margin-top: 8px; }
+
+  /* PRODUCTS */
+  .wf-products-section { padding: 56px 32px; background: #F0EFEC; }
+  .wf-product-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--wire-border); border: 1px solid var(--wire-border); }
+  .wf-product-card { background: var(--wire-white); display: flex; flex-direction: column; cursor: pointer; transition: box-shadow 0.15s; }
+  .wf-product-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; z-index: 1; }
+  .wf-product-img { aspect-ratio: 1/1; background: var(--wire-block); position: relative; display: flex; align-items: center; justify-content: center; }
+  .wf-product-img-icon { font-size: 24px; color: var(--wire-light); }
+  .wf-product-badge-box { position: absolute; top: 0; left: 0; background: var(--wire-orange); padding: 4px 10px; font-size: 9px; font-weight: 700; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
+  .wf-product-badge-box.dark { background: #3A3D42; }
+  .wf-product-info { padding: 14px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .wf-product-cat { height: 7px; width: 80px; background: var(--wire-block); border-radius: 1px; }
+  .wf-product-name { height: 10px; width: 100%; background: var(--wire-blue); opacity: 0.4; border-radius: 1px; }
+  .wf-product-name.short { width: 75%; }
+  .wf-product-stock { height: 7px; width: 60px; background: var(--wire-block); border-radius: 1px; }
+  .wf-product-stock.low { background: #C04030; opacity: 0.5; }
+  .wf-product-cta-box { margin-top: auto; padding: 10px; background: var(--wire-orange); text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
+
+  /* WHY FLIP */
+  .wf-why { display: grid; grid-template-columns: 1fr 1fr; }
+  .wf-why-left { padding: 56px 48px; background: var(--wire-white); display: flex; flex-direction: column; gap: 24px; }
+  .wf-why-right { padding: 56px 48px; background: #3A3D42; display: flex; flex-direction: column; gap: 20px; }
+  .wf-why-pillars { display: flex; flex-direction: column; gap: 20px; }
+  .wf-why-pillar { display: flex; gap: 16px; }
+  .wf-why-num { width: 28px; height: 28px; background: var(--wire-orange); opacity: 0.4; border-radius: 2px; flex-shrink: 0; }
+  .wf-why-lines { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .wf-why-title { height: 11px; width: 160px; background: var(--wire-dark); opacity: 0.5; border-radius: 2px; }
+  .wf-why-body-line { height: 7px; background: var(--wire-block); border-radius: 1px; }
+  .wf-brand-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wf-brand-tile { padding: 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+
+  /* SERVICES */
+  .wf-services-section { padding: 56px 32px; background: #F0EFEC; }
+  .wf-services-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--wire-border); border: 1px solid var(--wire-border); margin-top: 40px; }
+  .wf-service-card { background: var(--wire-white); padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: background 0.15s; }
+  .wf-service-card:hover { background: var(--wire-orange-l); }
+  .wf-service-num-box { height: 24px; width: 28px; background: var(--wire-block); border-radius: 2px; }
+  .wf-service-title-bar { height: 12px; width: 160px; background: var(--wire-dark); opacity: 0.5; border-radius: 2px; }
+  .wf-service-lines { display: flex; flex-direction: column; gap: 5px; }
+  .wf-service-line { height: 7px; background: var(--wire-block); border-radius: 1px; }
+
+  /* INDUSTRIES */
+  .wf-industries-section { padding: 56px 32px; background: var(--wire-white); }
+  .wf-industry-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--wire-border); border: 1px solid var(--wire-border); margin-top: 40px; }
+  .wf-industry-card { background: var(--wire-white); padding: 32px 28px; border-left: 4px solid transparent; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; gap: 10px; }
+  .wf-industry-card:hover { border-left-color: var(--wire-orange); background: var(--wire-orange-l); }
+  .wf-industry-title { height: 13px; width: 170px; background: var(--wire-dark); opacity: 0.55; border-radius: 2px; }
+  .wf-industry-lines { display: flex; flex-direction: column; gap: 5px; }
+  .wf-industry-line { height: 7px; background: var(--wire-block); border-radius: 1px; }
+  .wf-industry-cta { height: 7px; width: 70px; background: var(--wire-orange); opacity: 0.5; border-radius: 1px; margin-top: 6px; }
+
+  /* SUSTAINABILITY */
+  .wf-sustain { display: grid; grid-template-columns: 1fr 2.2fr; }
+  .wf-sustain-left { background: var(--wire-orange); padding: 56px 40px; display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+  .wf-big-stat { height: 52px; width: 120px; background: rgba(255,255,255,0.85); border-radius: 2px; }
+  .wf-big-stat-label { height: 9px; width: 130px; background: rgba(255,255,255,0.45); border-radius: 2px; }
+  .wf-stat-divider { width: 36px; height: 3px; background: rgba(255,255,255,0.35); }
+  .wf-sustain-right { background: #3A3D42; padding: 56px 48px; display: flex; flex-direction: column; gap: 20px; justify-content: center; }
+  .wf-sustain-points { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .wf-sustain-point { display: flex; gap: 8px; align-items: flex-start; }
+  .wf-sustain-dot { width: 6px; height: 6px; background: var(--wire-orange); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .wf-sustain-point-line { height: 8px; flex: 1; background: rgba(255,255,255,0.2); border-radius: 1px; }
+
+  /* LIQUIDATION BAND */
+  .wf-liq-band { background: #F0EFEC; border-top: 4px solid var(--wire-orange); padding: 48px 32px; display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+  .wf-liq-left { display: flex; flex-direction: column; gap: 10px; }
+  .wf-liq-eyebrow { height: 8px; width: 180px; background: var(--wire-orange); opacity: 0.5; border-radius: 2px; }
+  .wf-liq-title { height: 20px; width: 340px; background: var(--wire-dark); opacity: 0.6; border-radius: 2px; }
+  .wf-liq-lines { display: flex; flex-direction: column; gap: 5px; max-width: 500px; }
+  .wf-liq-line { height: 8px; background: var(--wire-block); border-radius: 1px; }
+
+  /* NEWSLETTER */
+  .wf-newsletter { background: #3A3D42; padding: 48px 32px; display: flex; justify-content: space-between; align-items: center; gap: 32px; }
+  .wf-newsletter-left { display: flex; flex-direction: column; gap: 8px; }
+  .wf-nl-title { height: 18px; width: 220px; background: rgba(255,255,255,0.7); border-radius: 2px; }
+  .wf-nl-body { display: flex; flex-direction: column; gap: 5px; }
+  .wf-nl-line { height: 7px; background: rgba(255,255,255,0.2); border-radius: 1px; }
+  .wf-nl-line.w280 { width: 280px; }
+  .wf-nl-line.w220 { width: 220px; }
+  .wf-form { display: flex; }
+  .wf-form-input { width: 260px; height: 44px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); }
+  .wf-form-btn { padding: 0 20px; background: var(--wire-orange); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; border: none; cursor: pointer; font-family: var(--font); }
+
+  /* FOOTER */
+  .wf-footer { background: #1E2126; padding: 48px 32px 24px; }
+  .wf-footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .wf-footer-logo { height: 36px; width: auto; filter: brightness(0) invert(1); opacity: 0.7; display: block; margin-bottom: 10px; }
+  .wf-footer-tagline { display: flex; flex-direction: column; gap: 5px; }
+  .wf-footer-line { height: 7px; background: rgba(255,255,255,0.15); border-radius: 1px; }
+  .wf-footer-line.w200 { width: 200px; }
+  .wf-footer-line.w160 { width: 160px; }
+  .wf-footer-col-title { height: 10px; width: 80px; background: rgba(255,255,255,0.5); border-radius: 1px; margin-bottom: 14px; }
+  .wf-footer-col-links { display: flex; flex-direction: column; gap: 8px; }
+  .wf-footer-col-link { height: 7px; background: rgba(255,255,255,0.15); border-radius: 1px; }
+  .wf-footer-col-link.w80 { width: 80px; }
+  .wf-footer-col-link.w100 { width: 100px; }
+  .wf-footer-col-link.w70 { width: 70px; }
+  .wf-footer-bottom { display: flex; justify-content: space-between; }
+  .wf-footer-bottom-line { height: 7px; background: rgba(255,255,255,0.1); border-radius: 1px; }
+  .wf-footer-bottom-line.w200 { width: 200px; }
+  .wf-footer-bottom-line.w160 { width: 160px; }
+
+  /* ANNOTATION BADGES on hover */
+  .anno-badge {
+    display: none;
+    position: absolute; top: 8px; right: 8px;
+    background: var(--wire-orange); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 3px 8px;
+    letter-spacing: 0.08em; z-index: 10;
+  }
+  .wf-section:hover .anno-badge { display: block; }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .anno-panel { display: none; }
+    .anno-toggle { display: none; }
+    .page-wrap { margin-right: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ANNOTATION TOGGLE -->
+<button class="anno-toggle shifted" id="annoToggle" onclick="toggleAnno()">Annotations</button>
+
+<!-- ANNOTATION PANEL -->
+<div class="anno-panel" id="annoPanel">
+  <div class="anno-header">
+    <h2>Section Notes</h2>
+    <button class="anno-close" onclick="toggleAnno()">✕</button>
+  </div>
+  <div class="anno-body">
+
+    <div class="anno-section" onclick="scrollTo('s-topbar')" id="a-topbar">
+      <div class="anno-num">01 — Top Bar</div>
+      <div class="anno-title">Announcement + Contact + Social</div>
+      <div class="anno-note">Lead with "50–75% Off Contract-Brand Furniture" — positions savings against new dealers immediately. Phone + Request Info for direct B2B contact. Social icons right-aligned, thin line style.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+      <span class="anno-tag tag-copy">Copy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-nav')" id="a-nav">
+      <div class="anno-num">02 — Navigation</div>
+      <div class="anno-title">Sticky nav, charcoal bg, real logo</div>
+      <div class="anno-note">Real FLIP logo on dark charcoal. Nav items: Furniture · Services · Office Spaces · Portfolio · About · Contact. Orange "Get a Project Quote" CTA — primary conversion action. Stays sticky on scroll.</div>
+      <span class="anno-tag tag-ux">UX</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-hero')" id="a-hero">
+      <div class="anno-num">03 — Hero</div>
+      <div class="anno-title">Split layout: headline left, photography right</div>
+      <div class="anno-note">Left: charcoal bg. Headline = "Contract-quality furnishings. Pre-owned intelligence." Orange rule divider. Subhead calls out HM/Steelcase/Knoll by name. Two CTAs: Browse Inventory (orange) + Request Quote (outline). Right: real office installation photography — show a finished, design-forward space, not a product shot. Bottom badge overlays brand names.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+      <span class="anno-tag tag-copy">Copy</span>
+      <span class="anno-tag tag-ux">UX</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-stats')" id="a-stats">
+      <div class="anno-num">04 — Stats Strip</div>
+      <div class="anno-title">4 proof stats on orange band</div>
+      <div class="anno-note">Left-to-right priority: 50–75% savings · 100M lbs diverted · 40K sq ft · 30+ years. Savings leads — it's the primary differentiator vs new dealers. Environmental stat second — Davies positions this prominently too.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-pillars')" id="a-pillars">
+      <div class="anno-num">05 — Three Pillars</div>
+      <div class="anno-title">Quality · Savings · Sustainability</div>
+      <div class="anno-note">NEW SECTION — doesn't exist on current site. This is the strategic core of the rebrand. Each pillar needs a killer one-liner + 2–3 proof sentences. Bottom tag lines act as scannable proof points. Hover state: orange tint to signal interactivity.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+      <span class="anno-tag tag-copy">Copy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-products')" id="a-products">
+      <div class="anno-num">06 — Featured Products</div>
+      <div class="anno-title">4-col product grid, brand names prominent</div>
+      <div class="anno-note">Product names should lead with brand (e.g. "Herman Miller Aeron" not just "Task Chair"). Hot Deal + Low Stock badges create urgency. "Add to Project Quote" CTA — keeps B2B framing. Section subhead: "Premium pre-owned inventory from the brands you'd specify new."</div>
+      <span class="anno-tag tag-copy">Copy</span>
+      <span class="anno-tag tag-ux">UX</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-why')" id="a-why">
+      <div class="anno-num">07 — Why FLIP</div>
+      <div class="anno-title">Split: service pillars left, brands right</div>
+      <div class="anno-note">Left (white): Full-service delivery · Account management · Inventory depth. Right (charcoal): Brand tiles — HM, Steelcase, Knoll, Haworth, Fritz Hansen, Kimball. Key copy: "These aren't substitutes — they're the same products, acquired smarter." CTA: Browse All Inventory.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+      <span class="anno-tag tag-copy">Copy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-services')" id="a-services">
+      <div class="anno-num">08 — Services</div>
+      <div class="anno-title">6-card grid, numbered</div>
+      <div class="anno-note">01 Space Planning · 02 Delivery & Install · 03 Moving/Reconfig · 04 Liquidation · 05 Asset Mgmt · 06 Disaster Recovery. Hover: orange tint. This section builds confidence that FLIP is a full-service partner, not just a reseller.</div>
+      <span class="anno-tag tag-ux">UX</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-industries')" id="a-industries">
+      <div class="anno-num">09 — Industries</div>
+      <div class="anno-title">6-card grid with left-border hover accent</div>
+      <div class="anno-note">Medical · Government · Education · Professional Services · Logistics · Stockton Local. Each card should speak to compliance/budget realities of that sector. Orange left-border on hover signals the link destination. "Learn more" arrow links to dedicated industry landing pages.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+      <span class="anno-tag tag-ux">UX</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-sustain')" id="a-sustain">
+      <div class="anno-num">10 — Sustainability</div>
+      <div class="anno-title">Split: big stat left (orange), copy right (charcoal)</div>
+      <div class="anno-note">100M lbs and 90%+ reuse rate as dominant visual numbers. Right side: position this as a procurement advantage, not just a feel-good stat. "Full chain-of-custody documentation" is the killer line for gov/healthcare buyers. Mirror Davies' "LEED credits" angle — FLIP's equivalent is the documented outcome report.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+      <span class="anno-tag tag-copy">Copy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-liq')" id="a-liq">
+      <div class="anno-num">11 — Liquidation CTA Band</div>
+      <div class="anno-title">Two-col: copy left, CTA right</div>
+      <div class="anno-note">"Outgrowing your current furniture?" — hooks the other side of the relationship (sell/liquidate, not just buy). Creates a full circular economy story. CTA: "Schedule a Free Assessment." Orange top border signals importance without a full-color section.</div>
+      <span class="anno-tag tag-strategy">Strategy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-nl')" id="a-nl">
+      <div class="anno-num">12 — Newsletter</div>
+      <div class="anno-title">Charcoal band, email + subscribe</div>
+      <div class="anno-note">Reframe from generic "get updates" to: "Large lots from Herman Miller and Steelcase arrive frequently. Procurement managers subscribe for early access." This makes the list feel like an insider advantage, not a marketing list.</div>
+      <span class="anno-tag tag-copy">Copy</span>
+    </div>
+
+    <div class="anno-section" onclick="scrollTo('s-footer')" id="a-footer">
+      <div class="anno-num">13 — Footer</div>
+      <div class="anno-title">4-col: brand + 3 nav columns</div>
+      <div class="anno-note">Logo inverted white. Tagline: "Northern California's pre-owned office furniture specialist for over 30 years." Slogan: "Same brands. Smarter buy. Nothing wasted." Columns: Furniture · Services · Company. Contact info in brand column.</div>
+      <span class="anno-tag tag-copy">Copy</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- PAGE WRAP -->
+<div class="page-wrap" id="pageWrap">
+
+  <!-- 01 TOP BAR -->
+  <div id="s-topbar" class="wf-section" onclick="highlight('a-topbar')" style="position:relative;">
+    <span class="anno-badge">01 — Top Bar</span>
+    <div class="wf-topbar">
+      <div class="wf-topbar-items" style="align-items:center; gap:16px;">
+        <div class="wf-topbar-pill">50–75% Off Contract-Brand Furniture</div>
+        <div class="wf-topbar-item sm"></div>
+        <div class="wf-topbar-item"></div>
+        <div class="wf-topbar-item sm"></div>
+      </div>
+      <div class="wf-topbar-social">
+        <div class="wf-social-dot"></div>
+        <div class="wf-social-dot"></div>
+        <div class="wf-social-dot"></div>
+        <div class="wf-social-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S-LABEL -->
+  <div class="section-label-bar" id="l-topbar" onclick="highlight('a-topbar')"><span class="slb-num">01</span><span class="slb-name">Top Bar</span><span class="slb-tag">Announcement · Contact · Social</span></div>
+
+  <!-- 02 NAV -->
+  <div id="s-nav" class="wf-section" onclick="highlight('a-nav')" style="position:relative;">
+    <span class="anno-badge">02 — Nav</span>
+    <div class="wf-nav">
+      <div class="wf-nav-logo">
+        <img src="data:image/png;base64,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" alt="FLIP" class="wf-nav-logo" style="height:40px;width:auto;filter:brightness(0) invert(1);opacity:0.9;">
+      </div>
+      <div class="wf-nav-links">
+        <div class="wf-nav-link">Furniture</div>
+        <div class="wf-nav-link">Services</div>
+        <div class="wf-nav-link">Office Spaces</div>
+        <div class="wf-nav-link">Portfolio</div>
+        <div class="wf-nav-link">About</div>
+        <div class="wf-nav-link">Contact</div>
+      </div>
+      <div class="wf-nav-cta">
+        <button class="wf-btn wf-btn-orange">Get a Project Quote</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-nav')"><span class="slb-num">02</span><span class="slb-name">Navigation</span><span class="slb-tag">Sticky · Charcoal · Real logo · Orange CTA</span></div>
+
+  <!-- 03 HERO -->
+  <div id="s-hero" class="wf-section" onclick="highlight('a-hero')" style="position:relative;">
+    <span class="anno-badge">03 — Hero</span>
+    <div class="wf-hero">
+      <div class="wf-hero-left">
+        <div class="wf-eyebrow"></div>
+        <div class="wf-h1">
+          <div class="wf-h1-line w100"></div>
+          <div class="wf-h1-line w80"></div>
+          <div class="wf-h1-line orange w100"></div>
+        </div>
+        <div class="wf-rule"></div>
+        <div class="wf-body-lines">
+          <div class="wf-body-line w100"></div>
+          <div class="wf-body-line w100"></div>
+          <div class="wf-body-line w70"></div>
+        </div>
+        <div class="wf-hero-btns">
+          <button class="wf-btn wf-btn-orange">Browse Inventory</button>
+          <button class="wf-btn wf-btn-outline">Request a Quote</button>
+        </div>
+      </div>
+      <div class="wf-hero-right">
+        <div class="wf-img-placeholder">
+          <div class="wf-img-icon">🏢</div>
+          <div class="wf-img-label">Real office installation photography<br>Design-forward completed space</div>
+        </div>
+        <div class="wf-hero-badge">
+          <div class="wf-badge-line orange"></div>
+          <div class="wf-badge-line full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-hero')"><span class="slb-num">03</span><span class="slb-name">Hero</span><span class="slb-tag">Split layout · Headline + photography · Dual CTA</span></div>
+
+  <!-- 04 STATS -->
+  <div id="s-stats" class="wf-section" onclick="highlight('a-stats')" style="position:relative;">
+    <span class="anno-badge">04 — Stats</span>
+    <div class="wf-stats">
+      <div class="wf-stat"><div class="wf-stat-num"></div><div class="wf-stat-label"></div><div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;font-weight:600;letter-spacing:0.06em;">50–75% Savings</div></div>
+      <div class="wf-stat"><div class="wf-stat-num"></div><div class="wf-stat-label"></div><div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;font-weight:600;letter-spacing:0.06em;">100M lbs Diverted</div></div>
+      <div class="wf-stat"><div class="wf-stat-num"></div><div class="wf-stat-label"></div><div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;font-weight:600;letter-spacing:0.06em;">40K Sq Ft</div></div>
+      <div class="wf-stat"><div class="wf-stat-num"></div><div class="wf-stat-label"></div><div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;font-weight:600;letter-spacing:0.06em;">30+ Years</div></div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-stats')"><span class="slb-num">04</span><span class="slb-name">Stats Strip</span><span class="slb-tag">Orange band · 4 proof numbers · Savings leads</span></div>
+
+  <!-- 05 THREE PILLARS -->
+  <div id="s-pillars" class="wf-section" onclick="highlight('a-pillars')" style="position:relative;">
+    <span class="anno-badge">05 — Pillars ★ NEW</span>
+    <div class="wf-pillars-section">
+      <div class="wf-section-head">
+        <div class="wf-section-eyebrow"></div>
+        <div class="wf-section-title"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:700;color:var(--wire-orange);letter-spacing:0.06em;">HEADLINE:</div>
+          <div style="font-size:12px;color:var(--wire-mid);">The Pre-owned Advantage — Quality · Savings · Sustainability</div>
+        </div>
+      </div>
+      <div class="wf-pillars-grid">
+        <div class="wf-pillar">
+          <div class="wf-pillar-accent"></div>
+          <div class="wf-pillar-num"></div>
+          <div class="wf-pillar-title"></div>
+          <div class="wf-pillar-body">
+            <div class="wf-pillar-line" style="width:100%"></div>
+            <div class="wf-pillar-line" style="width:100%"></div>
+            <div class="wf-pillar-line" style="width:85%"></div>
+            <div class="wf-pillar-line" style="width:90%"></div>
+          </div>
+          <div class="wf-pillar-tag"></div>
+          <div class="pillar-label">01 — QUALITY</div>
+        </div>
+        <div class="wf-pillar">
+          <div class="wf-pillar-accent"></div>
+          <div class="wf-pillar-num"></div>
+          <div class="wf-pillar-title"></div>
+          <div class="wf-pillar-body">
+            <div class="wf-pillar-line" style="width:100%"></div>
+            <div class="wf-pillar-line" style="width:100%"></div>
+            <div class="wf-pillar-line" style="width:75%"></div>
+            <div class="wf-pillar-line" style="width:90%"></div>
+          </div>
+          <div class="wf-pillar-tag"></div>
+          <div class="pillar-label">02 — SAVINGS</div>
+        </div>
+        <div class="wf-pillar">
+          <div class="wf-pillar-accent"></div>
+          <div class="wf-pillar-num"></div>
+          <div class="wf-pillar-title"></div>
+          <div class="wf-pillar-body">
+            <div class="wf-pillar-line" style="width:100%"></div>
+            <div class="wf-pillar-line" style="width:100%"></div>
+            <div class="wf-pillar-line" style="width:80%"></div>
+            <div class="wf-pillar-line" style="width:95%"></div>
+          </div>
+          <div class="wf-pillar-tag"></div>
+          <div class="pillar-label">03 — SUSTAINABILITY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-pillars')" style="background:#2a1a10;">
+    <span class="slb-num" style="color:#F5A882;">05 ★</span>
+    <span class="slb-name">Three Pillars</span>
+    <span class="slb-tag" style="color:rgba(245,168,130,0.6);">NEW SECTION — Core brand differentiator</span>
+  </div>
+
+  <!-- 06 PRODUCTS -->
+  <div id="s-products" class="wf-section" onclick="highlight('a-products')" style="position:relative;">
+    <span class="anno-badge">06 — Products</span>
+    <div class="wf-products-section">
+      <div class="wf-section-head" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;">
+        <div>
+          <div class="wf-section-eyebrow" style="margin-bottom:8px;"></div>
+          <div class="wf-section-title"></div>
+          <div style="font-size:11px;color:var(--wire-mid);margin-top:6px;font-style:italic;">Sub: "Premium pre-owned inventory from the brands you'd specify new."</div>
+        </div>
+        <button class="wf-btn wf-btn-outline" style="color:var(--wire-orange);border-color:var(--wire-orange);">See All Products</button>
+      </div>
+      <div class="wf-product-grid">
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🪑</div><div class="wf-product-badge-box">Hot Deal</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🪑</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🗂</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock low"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🖥</div><div class="wf-product-badge-box dark">Only 2 Left</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock low"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🪑</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🗂</div><div class="wf-product-badge-box">Hot Deal</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🪑</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock low"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+        <div class="wf-product-card"><div class="wf-product-img"><div class="wf-product-img-icon">🏢</div><div class="wf-product-badge-box dark">Only 1 Left</div></div><div class="wf-product-info"><div class="wf-product-cat"></div><div class="wf-product-name"></div><div class="wf-product-name short" style="margin-top:3px;opacity:0.2;"></div><div class="wf-product-stock low"></div><div class="wf-product-cta-box">Add to Project Quote</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-products')"><span class="slb-num">06</span><span class="slb-name">Featured Products</span><span class="slb-tag">4-col grid · Brand-name leads · Urgency badges</span></div>
+
+  <!-- 07 WHY FLIP -->
+  <div id="s-why" class="wf-section" onclick="highlight('a-why')" style="position:relative;">
+    <span class="anno-badge">07 — Why FLIP</span>
+    <div class="wf-why">
+      <div class="wf-why-left">
+        <div><div class="wf-section-eyebrow" style="margin-bottom:8px;"></div><div class="wf-section-title"></div><div style="font-size:11px;color:var(--wire-mid);font-style:italic;">More than a furniture store. A facilities partner.</div></div>
+        <div class="wf-why-pillars">
+          <div class="wf-why-pillar"><div class="wf-why-num"></div><div class="wf-why-lines"><div class="wf-why-title"></div><div class="wf-why-body-line" style="width:100%"></div><div class="wf-why-body-line" style="width:90%"></div></div></div>
+          <div class="wf-why-pillar"><div class="wf-why-num"></div><div class="wf-why-lines"><div class="wf-why-title"></div><div class="wf-why-body-line" style="width:100%"></div><div class="wf-why-body-line" style="width:80%"></div></div></div>
+          <div class="wf-why-pillar"><div class="wf-why-num"></div><div class="wf-why-lines"><div class="wf-why-title"></div><div class="wf-why-body-line" style="width:100%"></div><div class="wf-why-body-line" style="width:85%"></div></div></div>
+        </div>
+      </div>
+      <div class="wf-why-right">
+        <div><div class="wf-section-eyebrow" style="background:var(--wire-orange);opacity:0.6;height:8px;width:120px;margin-bottom:8px;"></div><div style="height:18px;width:260px;background:rgba(255,255,255,0.6);border-radius:2px;margin-bottom:8px;"></div><div style="font-size:11px;color:rgba(255,255,255,0.45);font-style:italic;margin-bottom:4px;">"Same products, acquired smarter."</div></div>
+        <div class="wf-brand-grid">
+          <div class="wf-brand-tile">Herman Miller</div>
+          <div class="wf-brand-tile">Steelcase</div>
+          <div class="wf-brand-tile">Knoll</div>
+          <div class="wf-brand-tile">Haworth</div>
+          <div class="wf-brand-tile">Fritz Hansen</div>
+          <div class="wf-brand-tile">Kimball</div>
+        </div>
+        <button class="wf-btn wf-btn-orange" style="width:fit-content;">Browse All Inventory</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-why')"><span class="slb-num">07</span><span class="slb-name">Why FLIP</span><span class="slb-tag">Split · Service pillars left · Brand names right</span></div>
+
+  <!-- 08 SERVICES -->
+  <div id="s-services" class="wf-section" onclick="highlight('a-services')" style="position:relative;">
+    <span class="anno-badge">08 — Services</span>
+    <div class="wf-services-section">
+      <div><div class="wf-section-eyebrow" style="margin-bottom:8px;"></div><div class="wf-section-title"></div><div style="font-size:11px;color:var(--wire-mid);font-style:italic;">One partner for every phase — from first sketch to final installation.</div></div>
+      <div class="wf-services-grid">
+        <div class="wf-service-card"><div class="wf-service-num-box"></div><div class="wf-service-title-bar"></div><div class="wf-service-lines"><div class="wf-service-line" style="width:100%"></div><div class="wf-service-line" style="width:90%"></div><div class="wf-service-line" style="width:75%"></div></div><div style="font-size:10px;font-weight:600;color:var(--wire-orange);margin-top:6px;letter-spacing:0.06em;">01 — Space Planning & Design</div></div>
+        <div class="wf-service-card"><div class="wf-service-num-box"></div><div class="wf-service-title-bar"></div><div class="wf-service-lines"><div class="wf-service-line" style="width:100%"></div><div class="wf-service-line" style="width:85%"></div><div class="wf-service-line" style="width:80%"></div></div><div style="font-size:10px;font-weight:600;color:var(--wire-orange);margin-top:6px;letter-spacing:0.06em;">02 — Delivery & Installation</div></div>
+        <div class="wf-service-card"><div class="wf-service-num-box"></div><div class="wf-service-title-bar"></div><div class="wf-service-lines"><div class="wf-service-line" style="width:100%"></div><div class="wf-service-line" style="width:90%"></div><div class="wf-service-line" style="width:70%"></div></div><div style="font-size:10px;font-weight:600;color:var(--wire-orange);margin-top:6px;letter-spacing:0.06em;">03 — Moving & Reconfiguration</div></div>
+        <div class="wf-service-card"><div class="wf-service-num-box"></div><div class="wf-service-title-bar"></div><div class="wf-service-lines"><div class="wf-service-line" style="width:100%"></div><div class="wf-service-line" style="width:80%"></div><div class="wf-service-line" style="width:85%"></div></div><div style="font-size:10px;font-weight:600;color:var(--wire-orange);margin-top:6px;letter-spacing:0.06em;">04 — Liquidation</div></div>
+        <div class="wf-service-card"><div class="wf-service-num-box"></div><div class="wf-service-title-bar"></div><div class="wf-service-lines"><div class="wf-service-line" style="width:100%"></div><div class="wf-service-line" style="width:95%"></div><div class="wf-service-line" style="width:65%"></div></div><div style="font-size:10px;font-weight:600;color:var(--wire-orange);margin-top:6px;letter-spacing:0.06em;">05 — Asset Management</div></div>
+        <div class="wf-service-card"><div class="wf-service-num-box"></div><div class="wf-service-title-bar"></div><div class="wf-service-lines"><div class="wf-service-line" style="width:100%"></div><div class="wf-service-line" style="width:88%"></div><div class="wf-service-line" style="width:72%"></div></div><div style="font-size:10px;font-weight:600;color:var(--wire-orange);margin-top:6px;letter-spacing:0.06em;">06 — Disaster Recovery</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-services')"><span class="slb-num">08</span><span class="slb-name">Services</span><span class="slb-tag">6-card numbered grid · Full-service proof</span></div>
+
+  <!-- 09 INDUSTRIES -->
+  <div id="s-industries" class="wf-section" onclick="highlight('a-industries')" style="position:relative;">
+    <span class="anno-badge">09 — Industries</span>
+    <div class="wf-industries-section">
+      <div><div class="wf-section-eyebrow" style="margin-bottom:8px;"></div><div class="wf-section-title"></div><div style="font-size:11px;color:var(--wire-mid);font-style:italic;">We speak your industry.</div></div>
+      <div class="wf-industry-grid">
+        <div class="wf-industry-card"><div class="wf-industry-title"></div><div class="wf-industry-lines"><div class="wf-industry-line" style="width:100%"></div><div class="wf-industry-line" style="width:90%"></div></div><div class="wf-industry-cta"></div><div style="font-size:10px;font-weight:600;color:var(--wire-mid);margin-top:6px;">Medical & Healthcare</div></div>
+        <div class="wf-industry-card"><div class="wf-industry-title"></div><div class="wf-industry-lines"><div class="wf-industry-line" style="width:100%"></div><div class="wf-industry-line" style="width:85%"></div></div><div class="wf-industry-cta"></div><div style="font-size:10px;font-weight:600;color:var(--wire-mid);margin-top:6px;">Government & Non-Profit</div></div>
+        <div class="wf-industry-card"><div class="wf-industry-title"></div><div class="wf-industry-lines"><div class="wf-industry-line" style="width:100%"></div><div class="wf-industry-line" style="width:95%"></div></div><div class="wf-industry-cta"></div><div style="font-size:10px;font-weight:600;color:var(--wire-mid);margin-top:6px;">Education & Learning</div></div>
+        <div class="wf-industry-card"><div class="wf-industry-title"></div><div class="wf-industry-lines"><div class="wf-industry-line" style="width:100%"></div><div class="wf-industry-line" style="width:80%"></div></div><div class="wf-industry-cta"></div><div style="font-size:10px;font-weight:600;color:var(--wire-mid);margin-top:6px;">Professional Services</div></div>
+        <div class="wf-industry-card"><div class="wf-industry-title"></div><div class="wf-industry-lines"><div class="wf-industry-line" style="width:100%"></div><div class="wf-industry-line" style="width:88%"></div></div><div class="wf-industry-cta"></div><div style="font-size:10px;font-weight:600;color:var(--wire-mid);margin-top:6px;">Logistics & Warehouse</div></div>
+        <div class="wf-industry-card"><div class="wf-industry-title"></div><div class="wf-industry-lines"><div class="wf-industry-line" style="width:100%"></div><div class="wf-industry-line" style="width:75%"></div></div><div class="wf-industry-cta"></div><div style="font-size:10px;font-weight:600;color:var(--wire-mid);margin-top:6px;">Stockton Local Projects</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-industries')"><span class="slb-num">09</span><span class="slb-name">Industries</span><span class="slb-tag">6-card grid · Sector-specific copy · Orange hover accent</span></div>
+
+  <!-- 10 SUSTAINABILITY -->
+  <div id="s-sustain" class="wf-section" onclick="highlight('a-sustain')" style="position:relative;">
+    <span class="anno-badge">10 — Sustainability</span>
+    <div class="wf-sustain">
+      <div class="wf-sustain-left">
+        <div class="wf-big-stat"></div>
+        <div class="wf-big-stat-label"></div>
+        <div class="wf-stat-divider"></div>
+        <div class="wf-big-stat" style="height:36px;width:90px;"></div>
+        <div class="wf-big-stat-label"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:700;margin-top:8px;letter-spacing:0.06em;">100M lbs · 90%+ reuse rate</div>
+      </div>
+      <div class="wf-sustain-right">
+        <div><div style="height:8px;width:140px;background:var(--wire-orange);opacity:0.6;border-radius:2px;margin-bottom:10px;"></div><div style="height:18px;width:280px;background:rgba(255,255,255,0.55);border-radius:2px;margin-bottom:10px;"></div><div style="font-size:11px;color:rgba(255,255,255,0.45);font-style:italic;">"Procurement good for your budget and your ESG report."</div></div>
+        <div style="height:8px;width:100%;background:rgba(255,255,255,0.2);border-radius:1px;"></div>
+        <div style="height:8px;width:90%;background:rgba(255,255,255,0.2);border-radius:1px;"></div>
+        <div class="wf-sustain-points">
+          <div class="wf-sustain-point"><div class="wf-sustain-dot"></div><div class="wf-sustain-point-line"></div></div>
+          <div class="wf-sustain-point"><div class="wf-sustain-dot"></div><div class="wf-sustain-point-line"></div></div>
+          <div class="wf-sustain-point"><div class="wf-sustain-dot"></div><div class="wf-sustain-point-line"></div></div>
+          <div class="wf-sustain-point"><div class="wf-sustain-dot"></div><div class="wf-sustain-point-line"></div></div>
+        </div>
+        <button class="wf-btn wf-btn-orange" style="width:fit-content;">Learn About Our Sustainability Program</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-sustain')"><span class="slb-num">10</span><span class="slb-name">Sustainability</span><span class="slb-tag">Big numbers left · Procurement angle right · ESG hook</span></div>
+
+  <!-- 11 LIQUIDATION -->
+  <div id="s-liq" class="wf-section" onclick="highlight('a-liq')" style="position:relative;">
+    <span class="anno-badge">11 — Liquidation CTA</span>
+    <div class="wf-liq-band">
+      <div class="wf-liq-left">
+        <div class="wf-liq-eyebrow"></div>
+        <div class="wf-liq-title"></div>
+        <div class="wf-liq-lines"><div class="wf-liq-line" style="width:100%"></div><div class="wf-liq-line" style="width:85%"></div></div>
+        <div style="font-size:11px;color:var(--wire-mid);font-style:italic;margin-top:4px;">"Outgrowing your current furniture? We'll handle the responsible liquidation."</div>
+      </div>
+      <button class="wf-btn wf-btn-orange" style="white-space:nowrap;align-self:center;">Schedule a Free Assessment</button>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-liq')"><span class="slb-num">11</span><span class="slb-name">Liquidation CTA Band</span><span class="slb-tag">Circular economy hook · Free assessment CTA</span></div>
+
+  <!-- 12 NEWSLETTER -->
+  <div id="s-nl" class="wf-section" onclick="highlight('a-nl')" style="position:relative;">
+    <span class="anno-badge">12 — Newsletter</span>
+    <div class="wf-newsletter">
+      <div class="wf-newsletter-left">
+        <div class="wf-nl-title"></div>
+        <div class="wf-nl-body"><div class="wf-nl-line w280"></div><div class="wf-nl-line w220"></div></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;margin-top:4px;">"Large lots from HM & Steelcase arrive frequently. Subscribe for early access."</div>
+      </div>
+      <div class="wf-form">
+        <div class="wf-form-input"></div>
+        <button class="wf-form-btn">Subscribe</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-nl')"><span class="slb-num">12</span><span class="slb-name">Newsletter</span><span class="slb-tag">Insider framing · Brand names in copy · Early access hook</span></div>
+
+  <!-- 13 FOOTER -->
+  <div id="s-footer" class="wf-section" onclick="highlight('a-footer')" style="position:relative;">
+    <span class="anno-badge">13 — Footer</span>
+    <div class="wf-footer">
+      <div class="wf-footer-grid">
+        <div>
+          <img src="data:image/png;base64,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" alt="FLIP" class="wf-footer-logo">
+          <div class="wf-footer-tagline">
+            <div class="wf-footer-line w200"></div>
+            <div class="wf-footer-line w160"></div>
+          </div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);font-style:italic;margin-top:8px;">"Same brands. Smarter buy. Nothing wasted."</div>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:5px;">
+            <div class="wf-footer-line" style="width:120px;"></div>
+            <div class="wf-footer-line" style="width:160px;"></div>
+          </div>
+        </div>
+        <div><div class="wf-footer-col-title"></div><div class="wf-footer-col-links"><div class="wf-footer-col-link w100"></div><div class="wf-footer-col-link w80"></div><div class="wf-footer-col-link w90"></div><div class="wf-footer-col-link w70"></div><div class="wf-footer-col-link w100"></div><div class="wf-footer-col-link w80"></div></div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.25);margin-top:8px;letter-spacing:0.06em;">FURNITURE</div></div>
+        <div><div class="wf-footer-col-title"></div><div class="wf-footer-col-links"><div class="wf-footer-col-link w100"></div><div class="wf-footer-col-link w90"></div><div class="wf-footer-col-link w80"></div><div class="wf-footer-col-link w100"></div><div class="wf-footer-col-link w70"></div><div class="wf-footer-col-link w90"></div></div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.25);margin-top:8px;letter-spacing:0.06em;">SERVICES</div></div>
+        <div><div class="wf-footer-col-title"></div><div class="wf-footer-col-links"><div class="wf-footer-col-link w80"></div><div class="wf-footer-col-link w100"></div><div class="wf-footer-col-link w90"></div><div class="wf-footer-col-link w70"></div><div class="wf-footer-col-link w80"></div><div class="wf-footer-col-link w100"></div></div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.25);margin-top:8px;letter-spacing:0.06em;">COMPANY</div></div>
+      </div>
+      <div class="wf-footer-bottom">
+        <div class="wf-footer-bottom-line w200"></div>
+        <div class="wf-footer-bottom-line w160"></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label-bar" onclick="highlight('a-footer')"><span class="slb-num">13</span><span class="slb-name">Footer</span><span class="slb-tag">4-col · Tagline + slogan · Contact info</span></div>
+
+</div><!-- end page-wrap -->
+
+<script>
+  let panelOpen = true;
+
+  function toggleAnno() {
+    const panel = document.getElementById('annoPanel');
+    const toggle = document.getElementById('annoToggle');
+    const wrap = document.getElementById('pageWrap');
+    panelOpen = !panelOpen;
+    panel.classList.toggle('collapsed', !panelOpen);
+    toggle.classList.toggle('shifted', panelOpen);
+    wrap.classList.toggle('full', !panelOpen);
+    toggle.textContent = panelOpen ? 'Close' : 'Annotations';
+  }
+
+  function highlight(id) {
+    document.querySelectorAll('.anno-section').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add('active');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function scrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+</body>
+</html>
